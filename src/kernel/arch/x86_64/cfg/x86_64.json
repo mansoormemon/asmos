@@ -1,0 +1,27 @@
+{
+    "arch": "x86_64",
+    "code-model": "kernel",
+    "data-layout": "e-m:e-i64:64-f80:128-n8:16:32:64-S128",
+    "disable-redzone": true,
+    "executables": true,
+    "features": "-mmx,-sse,+soft-float",
+    "frame-pointer": "always",
+    "linker": "rust-lld",
+    "linker-flavor": "ld.lld",
+    "llvm-target": "x86_64-unknown-none",
+    "no-default-libraries": true,
+    "os": "none",
+    "panic-strategy": "abort",
+    "position-independent-executables": false,
+    "pre-link-args": {
+        "ld.lld": [
+            "--script=src/kernel/arch/x86_64/cfg/link.ld"
+        ]
+    },
+    "relocation-model": "pic",
+    "target-c-int-width": "32",
+    "target-endian": "little",
+    "target-pointer-width": "64",
+    "tls-model": "global-dynamic",
+    "vendor": "unknown"
+}
