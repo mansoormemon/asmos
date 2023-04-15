@@ -18,7 +18,7 @@
             "--script=src/kernel/arch/x86_64/cfg/link.ld"
         ]
     },
-    "relocation-model": "pic",
+    "relocation-model": "static",
     "target-c-int-width": "32",
     "target-endian": "little",
     "target-pointer-width": "64",

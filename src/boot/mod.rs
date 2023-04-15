@@ -27,10 +27,10 @@ macro_rules! foreign_symbol {
 }
 
 extern "C" {
-    static _L_PHYSICAL_MEMORY_OFFSET: u8;
+    static _KERNEL_OFFSET: u8;
 
-    static _L_KERNEL_BEGIN: u8;
-    static _L_KERNEL_END: u8;
+    static _KERNEL_BEGIN: u8;
+    static _KERNEL_END: u8;
 }
 
 static mut MULTIBOOT_INFO: Option<BootInformation> = None;
@@ -41,18 +41,18 @@ pub fn init(boot_info_addr: usize) {
     }
 }
 
-pub fn get_info() -> &'static BootInformation {
+pub fn get_multiboot_info() -> &'static BootInformation {
     unsafe { MULTIBOOT_INFO.as_ref().unwrap() }
 }
 
-pub fn physical_memory_offset() -> usize {
-    foreign_symbol!(_L_PHYSICAL_MEMORY_OFFSET)
+pub fn kernel_offset() -> usize {
+    foreign_symbol!(_KERNEL_OFFSET)
 }
 
 pub fn kernel_begin() -> usize {
-    foreign_symbol!(_L_KERNEL_BEGIN)
+    foreign_symbol!(_KERNEL_BEGIN)
 }
 
 pub fn kernel_end() -> usize {
-    foreign_symbol!(_L_KERNEL_END)
+    foreign_symbol!(_KERNEL_END)
 }

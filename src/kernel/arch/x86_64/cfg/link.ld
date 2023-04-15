@@ -1,6 +1,6 @@
-ENTRY(_s_start)
+ENTRY(_start)
 
-_L_PHYSICAL_MEMORY_OFFSET = 0xFFFFFF8000000000;
+_KERNEL_OFFSET = 0xFFFFFFFF80000000;
 
 SECTIONS {
     . = 1M;
@@ -10,33 +10,33 @@ SECTIONS {
 		KEEP(*(.init*))
     }
 
-    . += _L_PHYSICAL_MEMORY_OFFSET;
+    . += _KERNEL_OFFSET;
 
 	. = ALIGN(4K);
-	_L_KERNEL_BEGIN = .;
+	_KERNEL_BEGIN = .;
 
-	.text ALIGN(4K) : AT(ADDR(.text) - _L_PHYSICAL_MEMORY_OFFSET) {
+	.text ALIGN(4K) : AT(ADDR(.text) - _KERNEL_OFFSET) {
 		*(.text*)
 	}
 
-	.rodata ALIGN(4K) : AT(ADDR(.rodata) - _L_PHYSICAL_MEMORY_OFFSET) {
+	.rodata ALIGN(4K) : AT(ADDR(.rodata) - _KERNEL_OFFSET) {
         *(.rodata*)
     }
 
-	.data ALIGN(4K) : AT(ADDR(.data) - _L_PHYSICAL_MEMORY_OFFSET) {
+	.data ALIGN(4K) : AT(ADDR(.data) - _KERNEL_OFFSET) {
         *(.data*)
     }
 
-    .bss ALIGN(4K) : AT(ADDR(.bss) - _L_PHYSICAL_MEMORY_OFFSET) {
+    .bss ALIGN(4K) : AT(ADDR(.bss) - _KERNEL_OFFSET) {
         *(.bss*)
     }
 
-    .got ALIGN(4K) : AT(ADDR(.got) - _L_PHYSICAL_MEMORY_OFFSET) {
+    .got ALIGN(4K) : AT(ADDR(.got) - _KERNEL_OFFSET) {
         *(.got*)
     }
 
     . = ALIGN(4K);
-	_L_KERNEL_END = .;
+	_KERNEL_END = .;
 
 	/DISCARD/ :{
 		*(.comment*)

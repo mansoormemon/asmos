@@ -26,73 +26,77 @@
 .include "meta.s"
 
 
-.global _s_start
+.global _start
 
 
 .extern k_main
 
 
 .section .rodata
-.set _S_PHYSICAL_MEMORY_OFFSET, 0xFFFFFF8000000000
 
-.set _S_STACK_SIZE, 16384
+.set _KERNEL_OFFSET, 0xFFFFFFFF80000000
 
-.set _S_P_STACK_TOP, _S_STACK_TOP - _S_PHYSICAL_MEMORY_OFFSET
+.set _STACK_SIZE, 16384
+.set _P_STACK_TOP, _STACK_TOP - _KERNEL_OFFSET
 
-.set _S_P_PML4, _S_PML4 - _S_PHYSICAL_MEMORY_OFFSET
-.set _S_P_PDPT, _S_PDPT - _S_PHYSICAL_MEMORY_OFFSET
-.set _S_P_PD, _S_PD - _S_PHYSICAL_MEMORY_OFFSET
-.set _S_P_GDT64_POINTER, _s_gdt64_pointer - _S_PHYSICAL_MEMORY_OFFSET
-
-
-_s_gdt64_pointer:
-    .word _s_gdt64_end - _s_gdt64 - 1
-    .quad _s_gdt64
-
-.align 16
-_s_gdt64:
-    .quad 0
-    _s_gdt64_k_code = . - _s_gdt64
-    .quad 0x00AF9A000000FFFF
-    _s_gdt64_k_data = . - _s_gdt64
-    .quad 0x00CF92000000FFFF
-_s_gdt64_end:
+.set _P_PML4, _PML4 - _KERNEL_OFFSET
+.set _P_PDPT_L, _PDPT_L - _KERNEL_OFFSET
+.set _P_PDPT_H, _PDPT_H - _KERNEL_OFFSET
+.set _P_PD, _PD - _KERNEL_OFFSET
 
 
 .section .init
 .code32
-_s_start:
+
+/**
+ * The Global Descriptor Table (GDT) is a structure that contains the segments of the program.
+ */
+.align 16
+_gdt64:
+    .quad 0
+    _gdt64_k_code = . - _gdt64
+    .quad 0x00AF9A000000FFFF
+    _gdt64_k_data = . - _gdt64
+    .quad 0x00CF92000000FFFF
+_gdt64_end:
+
+_gdt64_pointer:
+    .word _gdt64_end - _gdt64 - 1
+    .quad _gdt64
+
+
+_start:
     # Disable interrupts.
     cli
 
     # Set up stack.
-    mov esp, offset _S_P_STACK_TOP
+    mov esp, offset _P_STACK_TOP
 
     # Save multiboot structure address for later use.
     mov edi, ebx
 
     # Perform necessary checks to ensure compatibility.
-    call _s_check_multiboot
-    call _s_check_cpuid
-    call _s_check_long_mode
+    call _check_multiboot
+    call _check_cpuid
+    call _check_long_mode
 
     # Set up and enable paging.
-    call _s_set_up_page_tables
-    call _s_enable_paging
+    call _set_up_page_tables
+    call _enable_paging
 
     # Load 64-bit GDT.
-    lgdt [_S_P_GDT64_POINTER]
+    lgdt [_gdt64_pointer]
 
-    # Load new data segment into segment registers.
-    mov eax, _s_gdt64_k_data
+    # Load the new data segment into the segment registers.
+    mov eax, _gdt64_k_data
     mov ds, eax
     mov es, eax
     mov fs, eax
     mov gs, eax
     mov ss, eax
 
-    # Jump into new code segment.
-    jmp _s_gdt64_k_code:_s_start_higher_kernel - _S_PHYSICAL_MEMORY_OFFSET
+    # Jump to the new code segment.
+    jmp _gdt64_k_code:_start_higher_kernel - _KERNEL_OFFSET
 
     hlt
 
@@ -100,11 +104,11 @@ _s_start:
 /**
  * Check if the kernel was loaded by multiboot compliant bootloader.
  */
-_s_check_multiboot:
+_check_multiboot:
     cmp eax, 0x36D76289
-    jne ._s_no_multiboot
+    jne ._no_multiboot
     ret
-._s_no_multiboot:
+._no_multiboot:
     mov al, 0x30
     hlt
 
@@ -114,8 +118,7 @@ _s_check_multiboot:
  *
  * Reference: https://wiki.osdev.org/CPUID#Checking_CPUID_availability
  */
-_s_check_cpuid:
-    # Copy FLAGS in to EAX via stack.
+_check_cpuid:
     pushfd
     pop eax
     # Copy to ECX as well for comparing later on.
@@ -136,68 +139,77 @@ _s_check_cpuid:
     # Compare EAX and ECX. If they are equal then that means the bit wasn't flipped, and
     # CPUID isn't supported.
     cmp eax, ecx
-    je ._s_no_cpuid
+    je ._no_cpuid
     ret
-._s_no_cpuid:
+._no_cpuid:
     mov al, 0x31
     hlt
 
 
 /**
  * Check if long mode is supported.
+ *
+ * Reference: https://wiki.osdev.org/Setting_Up_Long_Mode#x86_or_x86-64
  */
-_s_check_long_mode:
+_check_long_mode:
     # Test if extended processor info is available.
     mov eax, 0x80000000                                     # Implicit argument for cpuid.
     cpuid                                                   # Get highest supported argument.
     cmp eax, 0x80000001                                     # It needs to be at least 0x80000001.
-    jb ._s_no_long_mode                                     # If it's less, the CPU is too old for long mode.
+    jb ._no_long_mode                                       # If it's less, the CPU is too old for long mode.
 
     # Use extended info to test if long mode is available.
     mov eax, 0x80000001                                     # Argument for extended processor info.
     cpuid                                                   # Returns various feature bits in ecx and edx.
     test edx, 0x20000000                                    # Test if the LM-bit is set in the D-register.
-    je ._s_no_long_mode                                     # If it's not set, there is no long mode.
+    je ._no_long_mode                                       # If it's not set, there is no long mode.
     ret
-._s_no_long_mode:
+._no_long_mode:
     mov al, 0x32
     hlt
 
 
 /**
- * Sets up the page tables for the kernel.
+ * Sets up page tables for the kernel.
  *
- * Mapping:
- *      0x0 - 0x4000_0000 -> 1 GiB [Identity Mapping]
- *      0xFFFF_FF80_0000_0000 - 0xFFFF_FF80_4000_0000 -> 1 GiB [0x0 - 0x4000_0000]
+ * =====================================================================================
+ *                                      MEMORY MAP
+ * -------------------------------------------------------------------------------------
+ *  0x0 - 0x4000_0000                               |   1 GiB   |   [0x0 - 0x4000_0000]
+ *  0xFFFF_FFFF_8000_0000 - 0xFFFF_FFFF_C000_0000   |   1 GiB   |   [0x0 - 0x4000_0000]
+ * =====================================================================================
  */
-_s_set_up_page_tables:
-    # Map the PDPT to the PML4.
-    lea ebx, [_S_P_PDPT + 0x3]                              # Present + Writable
+_set_up_page_tables:
+    # Map the lower 1 GiB of memory to the PML4.
+    lea ebx, [_P_PDPT_L + 0x3]                              # Load the address of the lower PDPT with the PRESENT and WRITABLE flags.
+    lea eax, [_P_PML4]                                      # Load the address of the PML4 into EAX.
+    mov dword ptr [eax], ebx                                # Set the value of the PML4 to the lower PDPT address.
 
-    lea eax, [_S_P_PML4]
-    mov dword ptr [eax], ebx
-
-    lea eax, [_S_P_PML4 + 511 * 8]
-    mov dword ptr [eax], ebx
+    # Map the upper 511 GiB of memory to the PML4.
+    lea ebx, [_P_PDPT_H + 0x3]                              # Load the address of the higher PDPT with the PRESENT and WRITABLE flags.
+    lea eax, [_P_PML4 + 511 * 8]                            # Load the address of the last PML4 entry into EAX.
+    mov dword ptr [eax], ebx                                # Set the value of the last PML4 entry to the higher PDPT address.
 
     # Map the PD to the PDPT.
-    lea ebx, [_S_P_PD + 0x3]                                # Present + Writable
-    # Map the first entry of the PD to the first entry of the PDPT.
-    lea eax, [_S_P_PDPT]
-    mov dword ptr [eax], ebx
+    lea ebx, [_P_PD + 0x3]                                  # Load the address of the PD with the PRESENT and WRITABLE flags.
+
+    lea eax, [_P_PDPT_L]                                    # Load the address of the lower PDPT into EAX.
+    mov dword ptr [eax], ebx                                # Set the value of the lower PDPT to the PD address.
+
+    lea eax, [_P_PDPT_H + 510 * 8]                          # Load the address of the 510th PDPT entry into EAX.
+    mov dword ptr [eax], ebx                                # Set the value of the 510th PDPT entry to the PD address.
 
     # In a loop, map each Page Directory (PD) entry to a 2 MiB region.
     mov ecx, 0                                              # Counter
     mov eax, 0x83                                           # Starting Address + [Present + Writable + Huge Page]
 
-._s_map_page_directory:
-    mov dword ptr [_S_P_PD + ecx * 8], eax
+._map_page_directory:
+    mov dword ptr [_P_PD + ecx * 8], eax
     add eax, 0x200000                                       # Step = 2 MiB
 
     inc ecx
     cmp ecx, 512
-    jne ._s_map_page_directory
+    jne ._map_page_directory
 
     ret
 
@@ -205,7 +217,7 @@ _s_set_up_page_tables:
 /**
  * This function enables paging in the x86-64 architecture.
  */
-_s_enable_paging:
+_enable_paging:
     # Enable flags in CR4 register:
     #   1. Protected-mode Virtual Interrupts (PVI)          [1]
     #   2. Physical Address Extension (PAE)                 [5]
@@ -215,7 +227,7 @@ _s_enable_paging:
     mov cr4, eax
 
     # Load PML4 to CR3 register (CPU uses this to access the PML4 table).
-    lea eax, [_S_P_PML4]
+    lea eax, [_P_PML4]
     mov cr3, eax
 
     # Set the long mode bit in the Extended Feature Enable Register (EFER).
@@ -239,9 +251,10 @@ _s_enable_paging:
 
 .section .text
 .code64
-_s_start_higher_kernel:
+
+_start_higher_kernel:
     # Adjust the stack pointer to point to the higher half of memory.
-    mov rax, _S_PHYSICAL_MEMORY_OFFSET
+    mov rax, _KERNEL_OFFSET
     or rsp, rax
 
     xor rbp, rbp
@@ -253,22 +266,25 @@ _s_start_higher_kernel:
 /**
  * This is a fallback loop in case we arrive at this point.
  */
-_s_halt:
+_halt:
     cli
     hlt
-    jmp _s_halt
+    jmp _halt
 
 
 .section .bss
+
 .align 4096
-_S_PML4:
+_PML4:
     .space 4096
-_S_PDPT:
-    .space  4096
-_S_PD:
+_PDPT_L:
     .space 4096
-_S_STACK_GUARD_PAGE:
+_PDPT_H:
     .space 4096
-_S_STACK_BOTTOM:
-    .space _S_STACK_SIZE
-_S_STACK_TOP:
+_PD:
+    .space 4096
+_STACK_GUARD_PAGE:
+    .space 4096
+_STACK_BOTTOM:
+    .space _STACK_SIZE
+_STACK_TOP:

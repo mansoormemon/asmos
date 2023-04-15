@@ -30,7 +30,7 @@ fn compile_assembly_code() -> Result<()> {
     println!("cargo:rerun-if-changed={}", cfg_dir);
     println!("cargo:rerun-if-changed={}", naked_dir);
 
-    cc::Build::new().file(dyn_concat!(naked_dir, "/main.s"))
+    cc::Build::new().file(dyn_concat!(naked_dir, "/prelude.s"))
                     .flag(dyn_concat!("-I", naked_dir).as_str())
                     .compile(ARCH);
 

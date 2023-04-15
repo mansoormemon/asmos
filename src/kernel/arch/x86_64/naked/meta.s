@@ -22,40 +22,40 @@
 
 .section .meta
 .align 8
-_s_multiboot_header:
+_multiboot_header:
     .long 0xE85250D6
     .long 0
-    .long _s_multiboot_header_end - _s_multiboot_header
-    .long -(0xE85250D6 + 0 + (_s_multiboot_header_end - _s_multiboot_header))
+    .long _multiboot_header_end - _multiboot_header
+    .long -(0xE85250D6 + 0 + (_multiboot_header_end - _multiboot_header))
 
 .align 8
-_s_info_request:
+_info_request:
     .short 1
     .short 0
-    .long _s_info_request_end - _s_info_request
+    .long _info_request_end - _info_request
     .long 6
-_s_info_request_end:
+_info_request_end:
 
 .align 8
-_s_console_request:
+_console_request:
     .short 4
     .short 0
-    .long _s_console_request_end - _s_console_request
+    .long _console_request_end - _console_request
     .long 3
-_s_console_request_end:
+_console_request_end:
 
 .align 8
-_s_framebuffer_request:
+_framebuffer_request:
     .short 5
     .short 1
-    .long _s_framebuffer_request_end - _s_framebuffer_request
+    .long _framebuffer_request_end - _framebuffer_request
     .long 80
     .long 25
     .long 0
-_s_framebuffer_request_end:
+_framebuffer_request_end:
 
 .align 8
     .short 0
     .short 0
     .long 8
-_s_multiboot_header_end:
+_multiboot_header_end:

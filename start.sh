@@ -13,8 +13,9 @@ BOOT_DIR="boot"
 GRUB_DIR="boot/grub"
 GRUB_CONFIG_FILE="grub.cfg"
 KERNEL_ISO="${KERNEL}.iso"
+PROFILE=$(echo "$KERNEL" | cut -d'/' -f3)
 
-LOG_FILE="target/debug.log"
+LOG_FILE="target/${PROFILE}.log"
 MEMORY_SIZE="4G"
 
 # Copy the needed files into an ISO image.
