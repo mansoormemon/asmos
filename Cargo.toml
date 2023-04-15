@@ -10,3 +10,7 @@ cc = "1.0.79"
 [dependencies]
 multiboot2 = "0.15.1"
 x86_64 = "0.14.10"
+
+[dependencies.lazy_static]
+version = "1.4.0"
+features = ["spin_no_std"]

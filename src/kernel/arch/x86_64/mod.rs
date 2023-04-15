@@ -22,7 +22,11 @@
 
 use x86_64::instructions;
 
-pub fn init() {}
+mod gdt;
+
+pub fn init() {
+    gdt::init().expect("kernel failed to initialize GDT");
+}
 
 pub fn hlt_loop() -> ! {
     loop {
