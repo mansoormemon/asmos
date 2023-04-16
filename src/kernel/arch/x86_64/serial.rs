@@ -20,15 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#[cfg_attr(target_arch = "x86_64", path = "arch/x86_64/mod.rs")]
-mod arch;
+use core::fmt::Arguments;
+use core::fmt::Write;
 
-pub mod serial;
+use lazy_static::lazy_static;
+use spin::Mutex;
+use uart_16550::SerialPort;
+use x86_64::instructions;
 
-pub fn init() {
-    arch::init();
+lazy_static! {
+    /// Serial communication through UART devices, which are compatible to the 16550 UART.
+    static ref UART_3F8: Mutex<SerialPort> = {
+        // On x86_64 architecture, the UART is accessed through port-mapped I/O.
+        const SERIAL_IO_PORT: u16 = 0x3F8;
+
+        let mut port = unsafe { SerialPort::new(SERIAL_IO_PORT) };
+        port.init();
+
+        Mutex::new(port)
+    };
 }
 
-pub fn hlt_loop() -> ! {
-    arch::hlt_loop();
+#[doc(hidden)]
+pub fn _print(args: Arguments) {
+    instructions::interrupts::without_interrupts(
+        || { UART_3F8.lock().write_fmt(args).expect("failed to print to serial output"); }
+    );
 }

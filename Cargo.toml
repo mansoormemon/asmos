@@ -9,6 +9,8 @@ cc = "1.0.79"
 
 [dependencies]
 multiboot2 = "0.15.1"
+spin = "0.9.8"
+uart_16550 = "0.2.18"
 x86_64 = "0.14.10"
 
 [dependencies.lazy_static]

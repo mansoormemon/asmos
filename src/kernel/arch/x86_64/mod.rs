@@ -25,6 +25,8 @@ use x86_64::instructions;
 mod gdt;
 mod idt;
 
+pub mod serial;
+
 pub fn init() {
     gdt::init().expect("kernel failed to initialize GDT");
     idt::init().expect("kernel failed to initialize IDT");

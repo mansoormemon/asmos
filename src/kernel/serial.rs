@@ -20,15 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#[cfg_attr(target_arch = "x86_64", path = "arch/x86_64/mod.rs")]
-mod arch;
+use core::fmt::Arguments;
 
-pub mod serial;
+use super::arch;
 
-pub fn init() {
-    arch::init();
+#[doc(hidden)]
+pub fn _print(args: Arguments) {
+    arch::serial::_print(args);
 }
 
-pub fn hlt_loop() -> ! {
-    arch::hlt_loop();
+#[macro_export]
+macro_rules! serial_print {
+    ($($arg:tt)*) => ($crate::kernel::serial::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! serial_println {
+    () => ($crate::serial_print!("\n"));
+    ($fmt:expr) => ($crate::serial_print!(concat!($fmt, "\n")));
+    ($fmt:expr, $($arg:tt)*) => ($crate::serial_print!(concat!($fmt, "\n"), $($arg)*));
 }
