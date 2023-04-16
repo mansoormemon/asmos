@@ -20,14 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#![no_std]
+mod logging;
 
-pub mod aux;
-pub mod boot;
-pub mod kernel;
-
-pub fn init(boot_info_addr: usize) {
-    aux::init();
-    boot::init(boot_info_addr);
-    kernel::init();
+pub fn init() {
+    logging::init().expect("failed to initialize the logger");
 }
