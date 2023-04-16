@@ -20,19 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use x86_64::instructions;
+use lazy_static::lazy_static;
+use x86_64::structures::idt::InterruptDescriptorTable;
 
-mod gdt;
-mod idt;
+lazy_static! {
+    /// Interrupt Descriptor Table (IDT)
+    ///
+    /// TThe Interrupt Descriptor Table (IDT) is a binary data structure specific to the IA-32 and x86-64
+    /// architectures. It is the Protected Mode and Long Mode counterpart to the Real Mode Interrupt Vector
+    /// Table (IVT) telling the CPU where the Interrupt Service Routines (ISR) are located (one per interrupt
+    /// vector).
+    ///
+    /// NOTE: Before implementing the IDT, ensure that a functional GDT is available.
+    ///
+    /// OS Dev Wiki: https://wiki.osdev.org/Interrupt_Descriptor_Table
+    static ref IDT: InterruptDescriptorTable = {
+        let idt = InterruptDescriptorTable::new();
 
-pub fn init() {
-    gdt::init().expect("kernel failed to initialize GDT");
-    idt::init().expect("kernel failed to initialize IDT");
+        idt
+    };
 }
 
-pub fn hlt_loop() -> ! {
-    loop {
-        instructions::hlt();
-        core::hint::spin_loop();
-    }
+pub fn init() -> Result<(), ()> {
+    IDT.load();
+
+    Ok(())
 }
