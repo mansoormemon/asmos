@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-.section .meta
+.section .meta, "aw", @progbits
 .align 8
 _multiboot_header:
     .long 0xE85250D6

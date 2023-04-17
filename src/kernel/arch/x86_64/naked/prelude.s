@@ -44,10 +44,6 @@
 .set _P_PDPT_H, _PDPT_H - _KERNEL_OFFSET
 .set _P_PD, _PD - _KERNEL_OFFSET
 
-
-.section .init
-.code32
-
 /**
  * The Global Descriptor Table (GDT) is a structure that contains the segments of the program.
  */
@@ -62,9 +58,13 @@ _gdt64_end:
 
 _gdt64_pointer:
     .word _gdt64_end - _gdt64 - 1
-    .quad _gdt64
+    .quad _gdt64 - _KERNEL_OFFSET
+
+.set _P_GDT64_POINTER, _gdt64_pointer - _KERNEL_OFFSET
 
 
+.section .init.text, "ax", @progbits
+.code32
 _start:
     # Disable interrupts.
     cli
@@ -85,7 +85,7 @@ _start:
     call _enable_paging
 
     # Load 64-bit GDT.
-    lgdt [_gdt64_pointer]
+    lgdt [_P_GDT64_POINTER]
 
     # Load the new data segment into the segment registers.
     mov eax, _gdt64_k_data
@@ -96,7 +96,7 @@ _start:
     mov ss, eax
 
     # Jump to the new code segment.
-    jmp _gdt64_k_code:_start_higher_kernel - _KERNEL_OFFSET
+    jmp far ptr _gdt64_k_code:_start_higher_kernel - _KERNEL_OFFSET
 
     hlt
 
@@ -249,9 +249,8 @@ _enable_paging:
     ret
 
 
-.section .text
+.section .text, "ax", @progbits
 .code64
-
 _start_higher_kernel:
     # Adjust the stack pointer to point to the higher half of memory.
     mov rax, _KERNEL_OFFSET
