@@ -26,6 +26,11 @@ use x86_64::instructions::segmentation::{CS, DS, ES, FS, GS, SS};
 use x86_64::instructions::segmentation::Segment;
 use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector};
 use x86_64::structures::tss::TaskStateSegment;
+use x86_64::VirtAddr;
+
+use super::exceptions::DoubleFaultException;
+
+pub const STACK_SIZE: usize = 8192;
 
 lazy_static! {
     /// Task State Segment (TSS)
@@ -39,7 +44,18 @@ lazy_static! {
     /// save registers automatically.
     ///
     /// OS Dev Wiki: https://wiki.osdev.org/Task_State_Segment
-    static ref TSS: TaskStateSegment = TaskStateSegment::new();
+    static ref TSS: TaskStateSegment = {
+        let mut tss = TaskStateSegment::new();
+
+        tss.interrupt_stack_table[DoubleFaultException::IST_INDEX] = {
+            static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
+            let stack_bottom = VirtAddr::from_ptr(unsafe { &STACK });
+            let stack_top = stack_bottom + STACK_SIZE;
+            stack_top
+        };
+
+        tss
+    };
 }
 
 lazy_static! {

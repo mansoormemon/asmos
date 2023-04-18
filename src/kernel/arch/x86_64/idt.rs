@@ -23,6 +23,8 @@
 use lazy_static::lazy_static;
 use x86_64::structures::idt::InterruptDescriptorTable;
 
+use super::exceptions::{BreakpointException, DoubleFaultException};
+
 lazy_static! {
     /// Interrupt Descriptor Table (IDT)
     ///
@@ -35,7 +37,16 @@ lazy_static! {
     ///
     /// OS Dev Wiki: https://wiki.osdev.org/Interrupt_Descriptor_Table
     static ref IDT: InterruptDescriptorTable = {
-        let idt = InterruptDescriptorTable::new();
+        let mut idt = InterruptDescriptorTable::new();
+
+        // Set breakpoint handler.
+        idt.breakpoint.set_handler_fn(BreakpointException::handler);
+
+        // Set double fault handler and a dedicated stack index for it.
+        unsafe {
+            idt.double_fault.set_handler_fn(DoubleFaultException::handler)
+                            .set_stack_index(DoubleFaultException::IST_INDEX as u16);
+        }
 
         idt
     };
