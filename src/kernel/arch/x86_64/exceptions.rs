@@ -26,8 +26,8 @@ use crate::serial_println;
 
 /// Breakpoint Exception (#BP, 0x03)
 ///
-/// A breakpoint exception occurs when the processor encounters a debug breakpoint instruction in
-/// the code, enabling the program's execution to be paused for the inspection of its current state.
+/// A breakpoint exception occurs when the processor encounters a debug breakpoint instruction in enabling the
+/// program's execution to be paused for the inspection of its current state.
 ///
 /// OS Dev Wiki: https://wiki.osdev.org/Exceptions#Breakpoint
 pub struct BreakpointException;

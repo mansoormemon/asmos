@@ -28,10 +28,9 @@ use super::exceptions::{BreakpointException, DoubleFaultException};
 lazy_static! {
     /// Interrupt Descriptor Table (IDT)
     ///
-    /// TThe Interrupt Descriptor Table (IDT) is a binary data structure specific to the IA-32 and x86-64
-    /// architectures. It is the Protected Mode and Long Mode counterpart to the Real Mode Interrupt Vector
-    /// Table (IVT) telling the CPU where the Interrupt Service Routines (ISR) are located (one per interrupt
-    /// vector).
+    /// The IDT is a binary data structure unique to the IA-32 and x86-64 architectures that serves as the
+    /// Protected Mode and Long Mode equivalent of the Real Mode Interrupt Vector Table (IVT), providing the CPU
+    /// with the location of the Interrupt Service Routines (ISR) for each interrupt vector.
     ///
     /// NOTE: Before implementing the IDT, ensure that a functional GDT is available.
     ///

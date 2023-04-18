@@ -29,9 +29,9 @@ use uart_16550::SerialPort;
 use x86_64::instructions;
 
 lazy_static! {
-    /// Serial communication through UART devices, which are compatible to the 16550 UART.
+    /// Serial communication through 16550 UART interface.
     static ref UART_3F8: Mutex<SerialPort> = {
-        // On x86_64 architecture, the UART is accessed through port-mapped I/O.
+        // On x86_64 architecture, the UART serial device is accessed through port-mapped I/O.
         const SERIAL_IO_PORT: u16 = 0x3F8;
 
         let mut port = unsafe { SerialPort::new(SERIAL_IO_PORT) };

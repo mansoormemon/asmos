@@ -35,13 +35,10 @@ pub const STACK_SIZE: usize = 8192;
 lazy_static! {
     /// Task State Segment (TSS)
     ///
-    /// A Task State Segment (TSS) is a binary data structure specific to the IA-32 and x86-64 architectures.
-    /// It holds information about a task. In Protected Mode the TSS is primarily suited for Hardware Task
-    /// Switching, where each individual Task has its own TSS. For use in software multitasking, one or two are
-    /// also generally used, as they allow for entering Ring 0 code after an interrupt. In Long Mode, the TSS
-    /// has a separate structure and is used to change the Stack Pointer after an interrupt or permission level
-    /// change. You'll have to update the TSS yourself in the multitasking function, as it apparently does not
-    /// save registers automatically.
+    /// The TSS is a binary data structure specific to the IA-32 and x86-64 architectures that holds information
+    /// about a task. In Long Mode, the TSS has a separate structure and is used to change the Stack Pointer after
+    /// an interrupt or permission level change. It's important to update the TSS manually in the multitasking
+    /// function since it does not save registers automatically.
     ///
     /// OS Dev Wiki: https://wiki.osdev.org/Task_State_Segment
     static ref TSS: TaskStateSegment = {
@@ -61,26 +58,26 @@ lazy_static! {
 lazy_static! {
     /// Global Descriptor Table (GDT)
     ///
-    /// The Global Descriptor Table (GDT) is a relic that was used for memory segmentation before paging became
-    /// the de facto standard. However, it is still needed in 64-bit mode for various things, such as kernel/user
-    /// mode configuration or TSS loading.
+    /// The GDT was originally used for memory segmentation, but with the adoption of paging it became less relevant.
+    /// However, it is still necessary in 64-bit mode for tasks such as kernel/user mode mode configuration and TSS
+    /// loading.
     ///
-    /// The GDT is a structure that contains the segments of the program. It was used on older architectures
-    /// to isolate programs from each other before paging became the standard.
+    /// The GDT is a structure that contains the segments of a program. On older architectures, it was used to isolate
+    /// programs from each other before paging became the standard.
     ///
     /// OS Dev Wiki: https://wiki.osdev.org/Global_Descriptor_Table
     static ref GDT: (GlobalDescriptorTable, [SegmentSelector; 3]) = {
         let mut gdt = GlobalDescriptorTable::new();
 
-        let k_code_selector = gdt.add_entry(Descriptor::kernel_code_segment());
-        let k_data_selector = gdt.add_entry(Descriptor::kernel_data_segment());
+        let k_code_segment_selector = gdt.add_entry(Descriptor::kernel_code_segment());
+        let k_data_segment_selector = gdt.add_entry(Descriptor::kernel_data_segment());
         let tss_selector = gdt.add_entry(Descriptor::tss_segment(&TSS));
 
         (
             gdt,
             [
-                k_code_selector,
-                k_data_selector,
+                k_code_segment_selector,
+                k_data_segment_selector,
                 tss_selector,
             ]
         )
@@ -95,12 +92,13 @@ pub enum GDTEntry {
 }
 
 pub fn init() -> Result<(), ()> {
+    // Load the GDT into the processor's Global Descriptor Table Register (GDTR).
     GDT.0.load();
     unsafe {
-        // Jump to the new code segment.
+        // Switch control to the new code segment.
         CS::set_reg(GDT.1[GDTEntry::KernelCodeSegment as usize]);
 
-        // Load the new data segment into the segment registers.
+        // Load the segment registers with the new data segment.
         DS::set_reg(GDT.1[GDTEntry::KernelDataSegment as usize]);
         ES::set_reg(GDT.1[GDTEntry::KernelDataSegment as usize]);
         FS::set_reg(GDT.1[GDTEntry::KernelDataSegment as usize]);
