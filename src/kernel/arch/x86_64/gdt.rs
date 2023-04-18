@@ -22,7 +22,7 @@
 
 use lazy_static::lazy_static;
 use x86_64::instructions;
-use x86_64::instructions::segmentation::CS;
+use x86_64::instructions::segmentation::{CS, DS, ES, FS, GS, SS};
 use x86_64::instructions::segmentation::Segment;
 use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector};
 use x86_64::structures::tss::TaskStateSegment;
@@ -39,11 +39,7 @@ lazy_static! {
     /// save registers automatically.
     ///
     /// OS Dev Wiki: https://wiki.osdev.org/Task_State_Segment
-    static ref TSS: TaskStateSegment = {
-        let tss = TaskStateSegment::new();
-
-        tss
-    };
+    static ref TSS: TaskStateSegment = TaskStateSegment::new();
 }
 
 lazy_static! {
@@ -57,26 +53,48 @@ lazy_static! {
     /// to isolate programs from each other before paging became the standard.
     ///
     /// OS Dev Wiki: https://wiki.osdev.org/Global_Descriptor_Table
-    static ref GDT: (GlobalDescriptorTable, Selectors) = {
+    static ref GDT: (GlobalDescriptorTable, [SegmentSelector; 3]) = {
         let mut gdt = GlobalDescriptorTable::new();
 
         let k_code_selector = gdt.add_entry(Descriptor::kernel_code_segment());
+        let k_data_selector = gdt.add_entry(Descriptor::kernel_data_segment());
         let tss_selector = gdt.add_entry(Descriptor::tss_segment(&TSS));
 
-        (gdt, Selectors{k_code_selector, tss_selector})
+        (
+            gdt,
+            [
+                k_code_selector,
+                k_data_selector,
+                tss_selector,
+            ]
+        )
     };
 }
 
-struct Selectors {
-    k_code_selector: SegmentSelector,
-    tss_selector: SegmentSelector,
+#[repr(usize)]
+pub enum GDTEntry {
+    KernelCodeSegment,
+    KernelDataSegment,
+    TaskStateSegment,
 }
 
 pub fn init() -> Result<(), ()> {
     GDT.0.load();
     unsafe {
-        CS::set_reg(GDT.1.k_code_selector);
-        instructions::tables::load_tss(GDT.1.tss_selector);
+        // Jump to the new code segment.
+        CS::set_reg(GDT.1[GDTEntry::KernelCodeSegment as usize]);
+
+        // Load the new data segment into the segment registers.
+        DS::set_reg(GDT.1[GDTEntry::KernelDataSegment as usize]);
+        ES::set_reg(GDT.1[GDTEntry::KernelDataSegment as usize]);
+        FS::set_reg(GDT.1[GDTEntry::KernelDataSegment as usize]);
+        GS::set_reg(GDT.1[GDTEntry::KernelDataSegment as usize]);
+
+        // In long mode, the stack segment selector's default value is 0, indicating a null segment.
+        SS::set_reg(SegmentSelector::NULL);
+
+        // Load the TSS into the processor's Task Register (TR).
+        instructions::tables::load_tss(GDT.1[GDTEntry::TaskStateSegment as usize]);
     }
 
     Ok(())
