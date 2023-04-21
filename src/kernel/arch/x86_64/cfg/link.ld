@@ -1,19 +1,26 @@
+OUTPUT_FORMAT("elf64-x86-64")
 ENTRY(_start)
 
 _KERNEL_OFFSET = 0xFFFFFFFF80000000;
 
 SECTIONS {
+    _RESERVED_REGION_BEGIN = .;
+
     . = 1M;
+
+    _PRELUDE_REGION_BEGIN = .;
 
     .init ALIGN(4K) : {
 		KEEP(*(.meta*))
 		KEEP(*(.init*))
     }
 
+	. = ALIGN(4K);
+    _PRELUDE_REGION_END = .;
+
     . += _KERNEL_OFFSET;
 
-	. = ALIGN(4K);
-	_KERNEL_BEGIN = .;
+	_KERNEL_REGION_BEGIN = .;
 
 	.text ALIGN(4K) : AT(ADDR(.text) - _KERNEL_OFFSET) {
 		*(.text*)
@@ -36,9 +43,12 @@ SECTIONS {
     }
 
     . = ALIGN(4K);
-	_KERNEL_END = .;
+	_KERNEL_REGION_END = .;
 
-	/DISCARD/ :{
+    . = ALIGN(2M);
+	_RESERVED_REGION_END = . - _KERNEL_OFFSET;
+
+	/DISCARD/ : {
 		*(.comment*)
         *(.eh_frame*)
         *(.gcc_except_table*)

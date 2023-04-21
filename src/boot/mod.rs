@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use core::ops::Range;
+
 use multiboot2::BootInformation;
 
 macro_rules! foreign_symbol {
@@ -27,10 +29,16 @@ macro_rules! foreign_symbol {
 }
 
 extern "C" {
+    static _RESERVED_REGION_BEGIN: u8;
+    static _RESERVED_REGION_END: u8;
+
+    static _PRELUDE_REGION_BEGIN: u8;
+    static _PRELUDE_REGION_END: u8;
+
     static _KERNEL_OFFSET: u8;
 
-    static _KERNEL_BEGIN: u8;
-    static _KERNEL_END: u8;
+    static _KERNEL_REGION_BEGIN: u8;
+    static _KERNEL_REGION_END: u8;
 }
 
 static mut MULTIBOOT_INFO: Option<BootInformation> = None;
@@ -41,18 +49,27 @@ pub fn init(boot_info_addr: usize) {
     }
 }
 
-pub fn get_multiboot_info() -> &'static BootInformation {
+pub fn multiboot_info() -> &'static BootInformation {
     unsafe { MULTIBOOT_INFO.as_ref().unwrap() }
+}
+
+pub fn multiboot_region() -> Range<usize> {
+    let multiboot_info = multiboot_info();
+    multiboot_info.start_address()..multiboot_info.end_address()
+}
+
+pub fn reserved_region() -> Range<usize> {
+    foreign_symbol!(_RESERVED_REGION_BEGIN)..foreign_symbol!(_RESERVED_REGION_END)
+}
+
+pub fn skeletal_region() -> Range<usize> {
+    foreign_symbol!(_PRELUDE_REGION_BEGIN)..foreign_symbol!(_PRELUDE_REGION_END)
 }
 
 pub fn kernel_offset() -> usize {
     foreign_symbol!(_KERNEL_OFFSET)
 }
 
-pub fn kernel_begin() -> usize {
-    foreign_symbol!(_KERNEL_BEGIN)
-}
-
-pub fn kernel_end() -> usize {
-    foreign_symbol!(_KERNEL_END)
+pub fn kernel_region() -> Range<usize> {
+    foreign_symbol!(_KERNEL_REGION_BEGIN)..foreign_symbol!(_KERNEL_REGION_END)
 }
