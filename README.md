@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="docs/images/cover.png" width="960">
+    <img src="static/cover.png" width="960">
 </div>
 
 <div align="center">
@@ -81,6 +81,8 @@ Mansoor Ahmed Memon
 ## License
 
 This project is licensed under the [MIT License](LICENSE.md).
+
+<br>
 
 <p align="center">
    <b><sub><sup><small>Copyright 2023 © asmOS</small></sup></sub></b>
