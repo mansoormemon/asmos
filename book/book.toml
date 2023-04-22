@@ -1,0 +1,21 @@
+[rust]
+edition = "2021"
+
+[book]
+authors = ["Mansoor Ahmed Memon"]
+description = "The book covers various technical specifications and design decisions involved in building the operating system."
+language = "en"
+title = "asmOS"
+
+[build]
+build-dir = "out"
+create-missing = false
+use-default-preprocessors = true
+
+[output.html]
+default-theme = "dark"
+edit-url-template = "https://github.com/mansoormemon/asmOS/edit/main/book/{path}"
+git-repository-icon = "fa-github"
+git-repository-url = "https://github.com/mansoormemon/asmOS"
+preferred-dark-theme = "ayu"
+site-url = "/asmOS/"
