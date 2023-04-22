@@ -17,6 +17,9 @@
     <a href="https://github.com/mansoormemon/asmOS/actions/workflows/rust.yml">
         <img src="https://github.com/mansoormemon/asmOS/actions/workflows/rust.yml/badge.svg" alt="Rust">
     </a>
+    <a href="https://github.com/mansoormemon/asmOS/actions/workflows/mdbook.yml">
+        <img src="https://github.com/mansoormemon/asmOS/actions/workflows/mdbook.yml/badge.svg" alt="MDBook">
+    </a>
     <a href="LICENSE.md">
         <img src="https://img.shields.io/badge/License-MIT-%23007396?labelColor=2b3137">
     </a>
@@ -77,6 +80,7 @@ Mansoor Ahmed Memon
 ## Links
 
 - [Repository](https://github.com/mansoormemon/asmOS)
+- [Documentation](https://mansoormemon.github.io/asmOS)
 
 ## License
 
