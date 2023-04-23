@@ -62,7 +62,7 @@ pub fn reserved_region() -> Range<usize> {
     foreign_symbol!(_RESERVED_REGION_BEGIN)..foreign_symbol!(_RESERVED_REGION_END)
 }
 
-pub fn skeletal_region() -> Range<usize> {
+pub fn prelude_region() -> Range<usize> {
     foreign_symbol!(_PRELUDE_REGION_BEGIN)..foreign_symbol!(_PRELUDE_REGION_END)
 }
 

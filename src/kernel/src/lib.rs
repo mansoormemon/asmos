@@ -20,22 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use x86_64::instructions;
+#![no_std]
 
-mod exceptions;
-mod gdt;
-mod idt;
+pub use wood::rx::log;
+#[cfg(feature = "x86_64")]
+use x86_64 as arch;
 
-pub mod serial;
+mod wood;
 
-pub fn init() {
-    gdt::init().expect("kernel failed to initialize GDT");
-    idt::init().expect("kernel failed to initialize IDT");
+pub fn init(boot_info_addr: usize) {
+    wood::init().expect("kernel failed to initialize logger");
+
+    arch::init(boot_info_addr);
 }
 
 pub fn hlt_loop() -> ! {
-    loop {
-        instructions::hlt();
-        core::hint::spin_loop();
-    }
+    arch::hlt_loop();
 }

@@ -22,25 +22,22 @@
 
 #![no_std]
 #![no_main]
+
 #![feature(lang_items)]
 #![feature(panic_info_message)]
 
 use core::panic::PanicInfo;
 
-use asmOS::serial_println;
-
 #[no_mangle]
 pub extern "C" fn k_main(boot_info_addr: usize) -> ! {
-    asmOS::init(boot_info_addr);
-
-    asmOS::kernel::hlt_loop();
+    kernel::init(boot_info_addr);
+    kernel::hlt_loop();
 }
 
 #[panic_handler]
 fn on_panic(panic_info: &PanicInfo) -> ! {
-    serial_println!("{:#?}", panic_info.message());
-
-    asmOS::kernel::hlt_loop();
+    kernel::log::error!("{:#?}", panic_info.message());
+    kernel::hlt_loop();
 }
 
 #[lang = "eh_personality"]

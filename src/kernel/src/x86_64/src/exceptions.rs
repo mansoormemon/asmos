@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use x86_64::structures::idt::InterruptStackFrame;
+use ::x86_64::structures::idt::InterruptStackFrame;
 
 use crate::serial_println;
 

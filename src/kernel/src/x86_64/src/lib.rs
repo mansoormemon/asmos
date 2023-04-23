@@ -20,30 +20,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use core::fmt::Arguments;
-use core::fmt::Write;
+#![no_std]
 
-use lazy_static::lazy_static;
-use spin::Mutex;
-use uart_16550::SerialPort;
-use x86_64::instructions;
+#![feature(abi_x86_interrupt)]
 
-lazy_static! {
-    /// Serial communication through 16550 UART interface.
-    static ref UART_3F8: Mutex<SerialPort> = {
-        // On x86_64 architecture, the UART serial device is accessed through port-mapped I/O.
-        const SERIAL_IO_PORT: u16 = 0x3F8;
+use ::x86_64::instructions;
 
-        let mut port = unsafe { SerialPort::new(SERIAL_IO_PORT) };
-        port.init();
+mod exceptions;
+mod gdt;
+mod idt;
 
-        Mutex::new(port)
-    };
+pub mod meta;
+pub mod serial;
+
+pub fn init(boot_info_addr: usize) {
+    meta::init(boot_info_addr);
+    gdt::init().expect("kernel failed to initialize GDT");
+    idt::init().expect("kernel failed to initialize IDT");
 }
 
-#[doc(hidden)]
-pub fn _print(args: Arguments) {
-    instructions::interrupts::without_interrupts(
-        || { UART_3F8.lock().write_fmt(args).expect("failed to print to serial output"); }
-    );
+pub fn hlt_loop() -> ! {
+    loop {
+        instructions::hlt();
+        core::hint::spin_loop();
+    }
 }

@@ -1,0 +1,20 @@
+[package]
+name = "x86_64"
+version = "0.1.0"
+edition = "2021"
+build = "recipes/build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+cc = "1.0.79"
+
+[dependencies]
+multiboot2 = "0.15.1"
+spin = "0.9.8"
+uart_16550 = "0.2.18"
+x86_64 = "0.14.10"
+
+[dependencies.lazy_static]
+version = "1.4.0"
+features = ["spin_no_std"]

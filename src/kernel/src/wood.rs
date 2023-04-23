@@ -20,15 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#![no_std]
-#![feature(abi_x86_interrupt)]
+use ::log::{Level, LevelFilter, Metadata, Record, SetLoggerError};
+use ::log::Log;
 
-pub mod aux;
-pub mod boot;
-pub mod kernel;
+use super::arch;
 
-pub fn init(boot_info_addr: usize) {
-    aux::init();
-    boot::init(boot_info_addr);
-    kernel::init();
+pub mod rx {
+    pub mod log {
+        pub use ::log::{debug, error, info, log, log_enabled, trace, warn};
+    }
+}
+
+struct Logger;
+
+impl Log for Logger {
+    fn enabled(&self, metadata: &Metadata) -> bool { metadata.level() <= Level::Trace }
+
+    fn log(&self, record: &Record) {
+        if !self.enabled(record.metadata()) { return; }
+
+        match record.level() {
+            Level::Debug => arch::serial_print!("\x1b[1;32m debug:\x1b[0m "),
+            Level::Error => arch::serial_print!("\x1b[1;31m error:\x1b[0m "),
+            Level::Info => arch::serial_print!("\x1b[1;36m info:\x1b[0m "),
+            Level::Warn => arch::serial_print!("\x1b[1;33m warn:\x1b[0m "),
+            Level::Trace => arch::serial_print!("\x1b[1;37m trace:\x1b[0m "),
+        }
+        arch::serial_println!("{}", record.args());
+    }
+
+    fn flush(&self) {}
+}
+
+pub fn init() -> Result<(), SetLoggerError> {
+    log::set_logger(&Logger)?;
+    log::set_max_level(LevelFilter::Trace);
+
+    Ok(())
 }

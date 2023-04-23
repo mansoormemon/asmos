@@ -8,8 +8,8 @@ set -xe
 KERNEL=$1
 
 ARCH=$(echo "$KERNEL" | cut -d'/' -f2)
-DEST_ISO_DIR="target/iso"
-SRC_ISO_DIR="iso"
+DEST_ISO_DIR="target/image"
+SRC_ISO_DIR="image"
 BOOT_DIR="boot"
 GRUB_DIR="boot/grub"
 GRUB_CONFIG_FILE="grub.cfg"

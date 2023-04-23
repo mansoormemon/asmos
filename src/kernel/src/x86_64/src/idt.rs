@@ -20,8 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use ::x86_64::structures::idt::InterruptDescriptorTable;
+
 use lazy_static::lazy_static;
-use x86_64::structures::idt::InterruptDescriptorTable;
 
 use super::exceptions::{BreakpointException, DoubleFaultException};
 
