@@ -33,14 +33,14 @@ use asmOS::serial_println;
 pub extern "C" fn k_main(boot_info_addr: usize) -> ! {
     asmOS::init(boot_info_addr);
 
-    asmOS::kernel::hlt_loop();
+    asmOS::hlt_loop();
 }
 
 #[panic_handler]
 fn on_panic(panic_info: &PanicInfo) -> ! {
     serial_println!("{:#?}", panic_info.message());
 
-    asmOS::kernel::hlt_loop();
+    asmOS::hlt_loop();
 }
 
 #[lang = "eh_personality"]

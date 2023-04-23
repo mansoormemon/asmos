@@ -20,13 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#[cfg_attr(target_arch = "x86_64", path = "arch/x86_64/mod.rs")]
 mod arch;
 
 pub mod serial;
 
-pub fn init() {
-    arch::init();
+pub fn init(boot_info_addr: usize) {
+    arch::init(boot_info_addr);
 }
 
 pub fn hlt_loop() -> ! {

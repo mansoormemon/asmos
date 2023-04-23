@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use log::{Level, Metadata, Record, SetLoggerError};
+use log::{Level, LevelFilter, Metadata, Record, SetLoggerError};
 use log::Log;
 
 use crate::{serial_print, serial_println};
@@ -28,9 +28,7 @@ use crate::{serial_print, serial_println};
 struct Logger;
 
 impl Log for Logger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= Level::Trace
-    }
+    fn enabled(&self, metadata: &Metadata) -> bool { metadata.level() <= Level::Trace }
 
     fn log(&self, record: &Record) {
         if !self.enabled(record.metadata()) { return; }
@@ -50,7 +48,7 @@ impl Log for Logger {
 
 pub fn init() -> Result<(), SetLoggerError> {
     log::set_logger(&Logger)?;
-    log::set_max_level(log::LevelFilter::Trace);
+    log::set_max_level(LevelFilter::Trace);
 
     Ok(())
 }

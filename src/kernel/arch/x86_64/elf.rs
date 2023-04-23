@@ -43,10 +43,12 @@ extern "C" {
 
 static mut MULTIBOOT_INFO: Option<BootInformation> = None;
 
-pub fn init(boot_info_addr: usize) {
+pub fn init(boot_info_addr: usize) -> Result<(), ()> {
     unsafe {
         MULTIBOOT_INFO = multiboot2::load(boot_info_addr).ok();
     }
+
+    Ok(())
 }
 
 pub fn multiboot_info() -> &'static BootInformation {
@@ -62,7 +64,7 @@ pub fn reserved_region() -> Range<usize> {
     foreign_symbol!(_RESERVED_REGION_BEGIN)..foreign_symbol!(_RESERVED_REGION_END)
 }
 
-pub fn skeletal_region() -> Range<usize> {
+pub fn prelude_region() -> Range<usize> {
     foreign_symbol!(_PRELUDE_REGION_BEGIN)..foreign_symbol!(_PRELUDE_REGION_END)
 }
 

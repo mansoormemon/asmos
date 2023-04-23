@@ -2,18 +2,17 @@
 name = "asmOS"
 version = "0.1.0"
 edition = "2021"
-build = "build.rs"
+build = "recipes/build.rs"
 
 [build-dependencies]
 cc = "1.0.79"
 
 [dependencies]
+lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 log = "0.4.17"
 multiboot2 = "0.15.1"
 spin = "0.9.8"
 uart_16550 = "0.2.18"
-x86_64 = "0.14.10"
 
-[dependencies.lazy_static]
-version = "1.4.0"
-features = ["spin_no_std"]
+[target.'cfg(target_arch = "x86_64")'.dependencies]
+x86_64 = "0.14.10"

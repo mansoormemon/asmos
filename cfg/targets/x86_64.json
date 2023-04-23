@@ -16,7 +16,7 @@
     "position-independent-executables": false,
     "pre-link-args": {
         "ld.lld": [
-            "--script=src/kernel/arch/x86_64/cfg/link.ld"
+            "--script=cfg/ld/x86_64.ld"
         ]
     },
     "relocation-model": "static",

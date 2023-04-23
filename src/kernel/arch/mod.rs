@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-mod log;
+#[cfg(target_arch = "x86_64")]
+pub use self::x86_64::*;
 
-pub fn init() {
-    log::init().expect("logger can only be initialized once");
-}
+#[cfg(target_arch = "x86_64")]
+mod x86_64;

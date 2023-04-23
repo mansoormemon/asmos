@@ -23,12 +23,14 @@
 #![no_std]
 #![feature(abi_x86_interrupt)]
 
-pub mod aux;
-pub mod boot;
+mod aux;
 pub mod kernel;
 
 pub fn init(boot_info_addr: usize) {
     aux::init();
-    boot::init(boot_info_addr);
-    kernel::init();
+    kernel::init(boot_info_addr);
+}
+
+pub fn hlt_loop() -> ! {
+    kernel::hlt_loop();
 }
