@@ -27,20 +27,20 @@
 
 use core::panic::PanicInfo;
 
-use asmOS::serial_println;
+use asmos::serial_println;
 
 #[no_mangle]
 pub extern "C" fn k_main(boot_info_addr: usize) -> ! {
-    asmOS::init(boot_info_addr);
+    asmos::init(boot_info_addr);
 
-    asmOS::hlt_loop();
+    asmos::hlt_loop();
 }
 
 #[panic_handler]
 fn on_panic(panic_info: &PanicInfo) -> ! {
     serial_println!("{:#?}", panic_info.message());
 
-    asmOS::hlt_loop();
+    asmos::hlt_loop();
 }
 
 #[lang = "eh_personality"]

@@ -3,7 +3,6 @@
 </div>
 
 <div align="center">
-    &nbsp
     <img src="https://img.shields.io/badge/QEMU-%232196F3?style=for-the-badge&logo=qemu&logoColor=white&labelColor=063760">
     &nbsp
     <img src="https://img.shields.io/badge/Assembly-%23FFC107?style=for-the-badge&logo=academia&logoColor=white&labelColor=664d00">
@@ -14,12 +13,14 @@
 <br>
 
 <div align="center">
-    <a href="https://github.com/mansoormemon/asmOS/actions/workflows/rust.yml">
-        <img src="https://github.com/mansoormemon/asmOS/actions/workflows/rust.yml/badge.svg" alt="Rust">
+    <a href="https://github.com/mansoormemon/asmos/actions/workflows/rust.yml">
+        <img src="https://github.com/mansoormemon/asmos/actions/workflows/rust.yml/badge.svg" alt="Rust">
     </a>
-    <a href="https://github.com/mansoormemon/asmOS/actions/workflows/mdbook.yml">
-        <img src="https://github.com/mansoormemon/asmOS/actions/workflows/mdbook.yml/badge.svg" alt="MDBook">
+    &nbsp
+    <a href="https://github.com/mansoormemon/asmos/actions/workflows/mdbook.yml">
+        <img src="https://github.com/mansoormemon/asmos/actions/workflows/mdbook.yml/badge.svg" alt="MDBook">
     </a>
+    &nbsp
     <a href="LICENSE.md">
         <img src="https://img.shields.io/badge/License-MIT-%23007396?labelColor=2b3137">
     </a>
@@ -48,7 +49,7 @@ architecture and modular design provide an excellent platform for learning and t
 
 ## Getting Started
 
-To build and run asmOS, you will need:
+To build and run <b>asmOS</b>, you will need:
 
 - Rustc, a compiler for Rust, the nightly channel (`>= 22-02-2023`)
 - Cargo, a package manager for Rust.
@@ -79,8 +80,8 @@ Mansoor Ahmed Memon
 
 ## Links
 
-- [Repository](https://github.com/mansoormemon/asmOS)
-- [Documentation](https://mansoormemon.github.io/asmOS)
+- [Repository](https://github.com/mansoormemon/asmos)
+- [Documentation](https://mansoormemon.github.io/asmos)
 
 ## License
 
@@ -89,5 +90,5 @@ This project is licensed under the [MIT License](LICENSE.md).
 <br>
 
 <p align="center">
-   <b><sub><sup><small>Copyright 2023 © asmOS</small></sup></sub></b>
+   <sub><sup><small>Copyright 2023 © <b>asmOS</b></small></sup></sub>
 </p>
