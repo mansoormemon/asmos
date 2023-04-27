@@ -10,39 +10,43 @@ SECTIONS {
 
     _PRELUDE_REGION_BEGIN = .;
 
-    .init ALIGN(4K) : {
+    .init : {
 		KEEP(*(.meta*))
 		KEEP(*(.init*))
+	    . = ALIGN(4K);
     }
 
-	. = ALIGN(4K);
     _PRELUDE_REGION_END = .;
 
     . += _KERNEL_OFFSET;
 
 	_KERNEL_REGION_BEGIN = .;
 
-	.text ALIGN(4K) : AT(ADDR(.text) - _KERNEL_OFFSET) {
+	.text : AT(ADDR(.text) - _KERNEL_OFFSET) {
 		*(.text*)
+	    . = ALIGN(4K);
 	}
 
-	.rodata ALIGN(4K) : AT(ADDR(.rodata) - _KERNEL_OFFSET) {
+	.rodata : AT(ADDR(.rodata) - _KERNEL_OFFSET) {
         *(.rodata*)
+	    . = ALIGN(4K);
     }
 
-	.data ALIGN(4K) : AT(ADDR(.data) - _KERNEL_OFFSET) {
+	.data : AT(ADDR(.data) - _KERNEL_OFFSET) {
         *(.data*)
+	    . = ALIGN(4K);
     }
 
-    .bss ALIGN(4K) : AT(ADDR(.bss) - _KERNEL_OFFSET) {
+    .bss : AT(ADDR(.bss) - _KERNEL_OFFSET) {
         *(.bss*)
+	    . = ALIGN(4K);
     }
 
-    .got ALIGN(4K) : AT(ADDR(.got) - _KERNEL_OFFSET) {
+    .got : AT(ADDR(.got) - _KERNEL_OFFSET) {
         *(.got*)
+	    . = ALIGN(4K);
     }
 
-    . = ALIGN(4K);
 	_KERNEL_REGION_END = .;
 
     . = ALIGN(2M);
